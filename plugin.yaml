@@ -1,0 +1,17 @@
+schema: mcpg.dev/plugin/v1
+id: dev.mcpg.backend.llm.anthropic
+name: Anthropic Messages API Backend
+license: Apache-2.0
+description: |
+  Cdylib descriptor for the Anthropic backend plugin. Ships a single
+  `backend` entity (chat) under one cdylib. The entity self-describes
+  its real kind (`anthropic.chat`) at runtime via its `manifest()`
+  slot, so the host dispatches to the right binding.
+
+  The static-firstparty path keeps using the per-kind `plugin.*.yaml`
+  descriptors + the gateway's manual registration block; this single
+  descriptor is for the native-cdylib loader only.
+class: backend
+runtime: native-cdylib-v1
+protocol_version: "1.0"
+required_capabilities: [network_outbound]

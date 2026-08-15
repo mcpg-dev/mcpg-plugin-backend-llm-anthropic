@@ -1,0 +1,74 @@
+[package]
+name = "mcpg-plugin-backend-llm-anthropic"
+version = "0.1.0-alpha.15"
+license = "Apache-2.0"
+edition = "2024"
+description = """
+Anthropic Messages API binding plugin for MCPG. Ships
+`AnthropicChatPlugin` (kind: `anthropic.chat`) — chat completions
+against `https://api.anthropic.com/v1/messages` with native vision
+input (file/PDF input is planned), streaming via SSE, agentic
+tool-calling, and structured output via the forced-tool pattern
+(synthetic `respond` tool whose `input_schema` is the operator's
+`output_schema`).
+
+Anthropic does not ship a native embedding API. Anthropic users
+who want embeddings use the standalone
+`mcpg-plugin-backend-llm-voyage` crate (Voyage AI is Anthropic's
+recommended embedding partner). The principle: partner / third-
+party APIs always live in their own dedicated crate, never bundled
+with the chat vendor's crate.
+"""
+
+[lib]
+# cdylib: the .so the gateway's native_loader dlopens. rlib: keeps the
+# in-tree unit/integration tests + the gateway's current static path
+# (AnthropicChatPlugin::new + set_host_handle in app/mod.rs) building.
+# The backend-plugin-migration adds the cdylib surface additively; the
+# gateway stays on the static path for now.
+crate-type = ["cdylib", "rlib"]
+
+[features]
+# Default OFF so the workspace build (which links the gateway bin
+# against this crate as an rlib) does not emit `mcpg_plugin_register`
+# and collide with the other plugin rlibs. Standalone cdylib builds
+# (nx docker:build / OCI publish) opt in via `--features cdylib-export`.
+default = []
+cdylib-export = []
+# Declared empty so the SDK macro's `register_static` accessor
+# (`#[cfg(feature = "static-firstparty")]`) stays gated OFF here and
+# does not trip `unexpected_cfgs`. The crate is consumed via the
+# gateway's own manual registration block today, NOT through the SDK
+# macro's static-firstparty path. (Note: the SDK *dependency* below
+# still enables its own `static-firstparty` feature — that is a
+# separate flag gating the SDK's `plugin_host` re-export, not this
+# crate's `register_static` emission.)
+static-firstparty = []
+
+[dependencies]
+tokio-util = "0.7"
+mcpg-backend-llm-shared = { git = "https://github.com/mcpg-dev/mcpg-backend-llm-shared", tag = "v0.1.0-beta.13", version = "=0.1.0-beta.13" }
+mcpg-sensitive = { git = "https://github.com/mcpg-dev/mcpg-sensitive", tag = "v0.1.0-beta.13", version = "=0.1.0-beta.13" }
+mcpg-plugin-protocol = { git = "https://github.com/mcpg-dev/mcpg-plugin-protocol", tag = "v0.1.0-beta.13", version = "=0.1.0-beta.13" }
+mcpg-plugin-sdk = { git = "https://github.com/mcpg-dev/mcpg-plugin-sdk", tag = "v0.1.0-beta.13", version = "=0.1.0-beta.13", features = ["static-firstparty"] }
+async-trait = "0.1"
+bytes = "1"
+chrono = { version = "0.4", features = ["clock"] }
+futures = "0.3"
+metrics = "0.24"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "stream"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# `rt-multi-thread` powers the cdylib sync bridge's private runtime
+# (`Builder::new_multi_thread`); the rest cover the async adapter logic
+# shared with the static path.
+tokio = { version = "1", features = ["sync", "rt", "rt-multi-thread", "time", "macros"] }
+tracing = "0.1"
+
+[dev-dependencies]
+async-trait = "0.1"
+axum = { version = "0.8", default-features = false, features = ["tokio", "http1", "json"] }
+
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "test-util"] }
+tokio-stream = "0.1"
+tower = "0.5"
