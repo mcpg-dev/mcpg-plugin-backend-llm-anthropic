@@ -52,7 +52,7 @@ plugins:
   - id: dev.mcpg.backend.llm.anthropic
     class: backend
     source:
-      oci: ghcr.io/mcpg-dev/source-code/plugins/backend-llm-anthropic:protocol-1
+      oci: ghcr.io/mcpg-dev/plugins/backend-llm-anthropic
 
 mcp:
   capabilities:
