@@ -1,6 +1,6 @@
 [package]
 name = "mcpg-plugin-backend-llm-anthropic"
-version = "0.1.0-alpha.32"
+version = "0.1.0-alpha.38"
 license = "Apache-2.0"
 edition = "2024"
 description = """
@@ -47,16 +47,16 @@ static-firstparty = []
 
 [dependencies]
 tokio-util = "0.7"
-mcpg-backend-llm-shared = { git = "https://github.com/mcpg-dev/mcpg-backend-llm-shared", tag = "v0.1.0-beta.29", version = "=0.1.0-beta.29" }
-mcpg-sensitive = { git = "https://github.com/mcpg-dev/mcpg-sensitive", tag = "v0.1.0-beta.28", version = "=0.1.0-beta.28" }
-mcpg-plugin-protocol = { git = "https://github.com/mcpg-dev/mcpg-plugin-protocol", tag = "v0.1.0-beta.29", version = "=0.1.0-beta.29" }
-mcpg-plugin-sdk = { git = "https://github.com/mcpg-dev/mcpg-plugin-sdk", tag = "v0.1.0-beta.30", version = "=0.1.0-beta.30", features = ["static-firstparty"] }
+mcpg-backend-llm-shared = { git = "https://github.com/mcpg-dev/mcpg-backend-llm-shared", tag = "v0.1.0-beta.35", version = "=0.1.0-beta.35" }
+mcpg-sensitive = { git = "https://github.com/mcpg-dev/mcpg-sensitive", tag = "v0.1.0-beta.34", version = "=0.1.0-beta.34" }
+mcpg-plugin-protocol = { git = "https://github.com/mcpg-dev/mcpg-plugin-protocol", tag = "v0.1.0-beta.35", version = "=0.1.0-beta.35" }
+mcpg-plugin-sdk = { git = "https://github.com/mcpg-dev/mcpg-plugin-sdk", tag = "v0.1.0-beta.36", version = "=0.1.0-beta.36", features = ["static-firstparty"] }
 async-trait = "0.1"
 bytes = "1"
 chrono = { version = "0.4", features = ["clock"] }
 futures = "0.3"
 metrics = "0.24"
-reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "stream"] }
+reqwest = { version = "0.13", default-features = false, features = ["json", "rustls", "stream"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 # `rt-multi-thread` powers the cdylib sync bridge's private runtime
