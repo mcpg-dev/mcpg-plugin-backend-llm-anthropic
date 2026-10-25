@@ -222,7 +222,7 @@ impl BackendPlugin for AnthropicChatPlugin {
 
         let started = std::time::Instant::now();
         let result = engine
-            .execute(&args, &request.request_id, request.session_id.as_deref())
+            .execute_with_usage(&args, &request.request_id, request.session_id.as_deref())
             .instrument(internal_span)
             .await;
         let elapsed = started.elapsed();
@@ -271,14 +271,8 @@ impl BackendPlugin for AnthropicChatPlugin {
         .await;
         drop(host_span);
 
-        let value = result?;
-        let payload = serde_json::to_vec(&value).map_err(|e| BackendError::Transport {
-            message: format!("serialize response: {e}"),
-        })?;
-        Ok(BackendResponse {
-            payload,
-            truncated: false,
-        })
+        let (value, usage) = result?;
+        mcpg_backend_llm_shared::engine::response_with_usage(value, usage, &request.headers)
     }
 
     async fn execute_streaming(
@@ -312,7 +306,11 @@ impl BackendPlugin for AnthropicChatPlugin {
             engine.spec.model.clone(),
             request.identity.clone(),
             request.request_id.clone(),
-            engine.execute_streaming(args, request.request_id, request.session_id),
+            if mcpg_plugin_protocol::BackendUsage::accepted_by(&request.headers) {
+                engine.execute_streaming_with_usage(args, request.request_id, request.session_id)
+            } else {
+                engine.execute_streaming(args, request.request_id, request.session_id)
+            },
         ))
     }
 }
